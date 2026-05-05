@@ -1,0 +1,65 @@
+databaseChangeLog:
+  - changeSet:
+      id: 003-create-habit-logs-table
+      author: bereketab
+      changes:
+        - createTable:
+            tableName: habit_logs
+            columns:
+              - column:
+                  name: id
+                  type: UUID
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: habit_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_habit_logs_habit
+                    references: habits(id)
+              - column:
+                  name: user_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_habit_logs_user
+                    references: users(id)
+              - column:
+                  name: logged_date
+                  type: DATE
+                  constraints:
+                    nullable: false
+              - column:
+                  name: note
+                  type: VARCHAR(500)
+              - column:
+                  name: completed
+                  type: BOOLEAN
+                  defaultValueBoolean: true
+                  constraints:
+                    nullable: false
+              - column:
+                  name: created_at
+                  type: TIMESTAMP WITH TIME ZONE
+                  constraints:
+                    nullable: false
+
+        - addUniqueConstraint:
+            tableName: habit_logs
+            constraintName: uq_habit_logs_habit_date
+            columnNames: habit_id, logged_date
+
+        - createIndex:
+            tableName: habit_logs
+            indexName: idx_habit_logs_habit_id
+            columns:
+              - column:
+                  name: habit_id
+        - createIndex:
+            tableName: habit_logs
+            indexName: idx_habit_logs_user_id
+            columns:
+              - column:
+                  name: user_id

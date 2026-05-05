@@ -1,0 +1,102 @@
+databaseChangeLog:
+  - changeSet:
+      id: 009-create-challenges-table
+      author: bereketab
+      changes:
+        - createTable:
+            tableName: challenges
+            columns:
+              - column:
+                  name: id
+                  type: UUID
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: creator_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_challenges_creator
+                    references: users(id)
+              - column:
+                  name: title
+                  type: VARCHAR(150)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: description
+                  type: VARCHAR(1000)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: start_date
+                  type: DATE
+                  constraints:
+                    nullable: false
+              - column:
+                  name: end_date
+                  type: DATE
+                  constraints:
+                    nullable: false
+              - column:
+                  name: category
+                  type: VARCHAR(30)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: created_at
+                  type: TIMESTAMP WITH TIME ZONE
+                  constraints:
+                    nullable: false
+
+  - changeSet:
+      id: 009-create-challenge-participants-table
+      author: university
+      changes:
+        - createTable:
+            tableName: challenge_participants
+            columns:
+              - column:
+                  name: id
+                  type: UUID
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: challenge_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_cp_challenge
+                    references: challenges(id)
+              - column:
+                  name: user_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_cp_user
+                    references: users(id)
+              - column:
+                  name: joined_at
+                  type: TIMESTAMP WITH TIME ZONE
+                  constraints:
+                    nullable: false
+              - column:
+                  name: is_completed
+                  type: BOOLEAN
+                  defaultValueBoolean: false
+                  constraints:
+                    nullable: false
+
+        - addUniqueConstraint:
+            tableName: challenge_participants
+            constraintName: uq_cp_challenge_user
+            columnNames: challenge_id, user_id
+
+        - createIndex:
+            tableName: challenge_participants
+            indexName: idx_cp_challenge_id
+            columns:
+              - column:
+                  name: challenge_id

@@ -1,0 +1,59 @@
+services:
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: healthy_social_postgres
+    environment:
+      POSTGRES_DB: healthy_social
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:25.0.2
+    container_name: healthy_social_keycloak
+    command: start-dev --import-realm
+    environment:
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+      KC_HEALTH_ENABLED: "true"
+    ports:
+      - "8180:8080"
+    volumes:
+      - ./backend/keycloak/realm-export.json:/opt/keycloak/data/import/realm-export.json
+    healthcheck:
+      test: ["CMD-SHELL", "exec 3<>/dev/tcp/127.0.0.1/9000; echo -e \"GET /health/ready HTTP/1.1\r\nhost: localhost\r\nConnection: close\r\n\r\n\" >&3; grep -q \"200 OK\" <&3"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  app:
+    image: eclipse-temurin:21-jre-jammy
+    container_name: healthy_social_app
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./backend/build/libs/healthysocial-0.0.1-SNAPSHOT.jar:/app/app.jar
+    command: java -jar /app/app.jar
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/healthy_social
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgres
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI: http://keycloak:8080/realms/healthy-social/protocol/openid-connect/certs
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: http://localhost:8180/realms/healthy-social
+    depends_on:
+      postgres:
+        condition: service_healthy
+      keycloak:
+        condition: service_healthy
+
+volumes:
+  postgres_data:

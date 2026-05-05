@@ -1,0 +1,95 @@
+spring:
+  application:
+    name: healthysocial
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/healthy_social
+    username: postgres
+    password: postgres
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 2
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1800000
+
+  jpa:
+    hibernate:
+      ddl-auto: validate        # Liquibase owns the schema; Hibernate only validates
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+        default_schema: public
+        jdbc:
+          batch_size: 25
+        order_inserts: true
+        order_updates: true
+
+  liquibase:
+    change-log: classpath:/db/changelog/db.changelog-master.yaml
+    enabled: true
+
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          # Keycloak JWKS endpoint – replace 'healthy-social' with your realm name
+          jwk-set-uri: http://localhost:8180/realms/healthy-social/protocol/openid-connect/certs
+          issuer-uri: http://localhost:8180/realms/healthy-social
+
+# ── Application-specific settings ────────────────────────────────────────────
+app:
+  keycloak:
+    realm: healthy-social
+    resource: healthy-social-client   # Keycloak client id
+  pagination:
+    default-page-size: 20
+    max-page-size: 100
+
+# ── Actuator ─────────────────────────────────────────────────────────────────
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      show-details: when-authorized
+
+# ── OpenAPI / Swagger ─────────────────────────────────────────────────────────
+springdoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    oauth2-redirect-url: /swagger-ui/oauth2-redirect.html
+    oauth:
+      client-id: healthy-social-client
+      realm: healthy-social
+      app-name: Healthy Lifestyle Social API
+
+# ── Logging ───────────────────────────────────────────────────────────────────
+logging:
+  level:
+    com.university.healthysocial: DEBUG
+    org.springframework.security: INFO
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql: TRACE
+
+---
+# ── Test profile ─────────────────────────────────────────────────────────────
+spring:
+  config:
+    activate:
+      on-profile: test
+  datasource:
+    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;MODE=PostgreSQL
+    driver-class-name: org.h2.Driver
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+  liquibase:
+    enabled: false

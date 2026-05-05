@@ -1,0 +1,17 @@
+databaseChangeLog:
+  - changeSet:
+      id: 010-seed-clean
+      author: bereketab
+      changes:
+        - sql:
+            sql: |
+              DELETE FROM public.challenge_participants;
+              DELETE FROM public.likes;
+              DELETE FROM public.comments;
+              DELETE FROM public.follows;
+              DELETE FROM public.habit_logs;
+              DELETE FROM public.posts;
+              DELETE FROM public.goals;
+              DELETE FROM public.habits;
+              DELETE FROM public.challenges;
+              DELETE FROM public.users;

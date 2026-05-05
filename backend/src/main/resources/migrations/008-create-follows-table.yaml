@@ -1,0 +1,51 @@
+databaseChangeLog:
+  - changeSet:
+      id: 008-create-follows-table
+      author: bereketab
+      changes:
+        - createTable:
+            tableName: follows
+            columns:
+              - column:
+                  name: id
+                  type: UUID
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: follower_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_follows_follower
+                    references: users(id)
+              - column:
+                  name: following_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_follows_following
+                    references: users(id)
+              - column:
+                  name: created_at
+                  type: TIMESTAMP WITH TIME ZONE
+                  constraints:
+                    nullable: false
+
+        - addUniqueConstraint:
+            tableName: follows
+            constraintName: uq_follows_pair
+            columnNames: follower_id, following_id
+
+        - createIndex:
+            tableName: follows
+            indexName: idx_follows_follower_id
+            columns:
+              - column:
+                  name: follower_id
+        - createIndex:
+            tableName: follows
+            indexName: idx_follows_following_id
+            columns:
+              - column:
+                  name: following_id

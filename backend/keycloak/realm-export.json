@@ -1,0 +1,26 @@
+{
+  "id": "healthy-social",
+  "realm": "healthy-social",
+  "enabled": true,
+  "registrationAllowed": true,
+  "registrationEmailAsUsername": false,
+  "attributes": {
+    "frontendUrl": "http://localhost:8180"
+  },
+  "roles": {
+    "realm": [
+      { "name": "USER" },
+      { "name": "ADMIN" }
+    ]
+  },
+  "clients": [
+    {
+      "clientId": "healthy-social-client",
+      "enabled": true,
+      "publicClient": true,
+      "directAccessGrantsEnabled": true,
+      "webOrigins": ["*"],
+      "redirectUris": ["*"]
+    }
+  ]
+}

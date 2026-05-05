@@ -1,0 +1,37 @@
+databaseChangeLog:
+  - changeSet:
+      id: 018-seed-challenges
+      author: bereketab
+      changes:
+        - sql:
+            sql: |
+              INSERT INTO public.challenges (id, creator_id, title, description, start_date, end_date, category, created_at) VALUES
+              ('90000000-0000-0000-0000-000000000001','10000000-0000-0000-0000-000000000007','30-Day No Sugar Challenge','Eliminate all processed and added sugar for 30 consecutive days. Track your energy, mood and skin changes. The results will shock you!','2026-04-15','2026-05-15','NUTRITION',NOW()-INTERVAL '16 days'),
+              ('90000000-0000-0000-0000-000000000002','10000000-0000-0000-0000-000000000001','10K Steps Every Day','Hit 10,000 steps every single day this month. No excuses — take the stairs, walk on calls, pace when you think. Movement is medicine!','2026-05-01','2026-05-31','EXERCISE',NOW()-INTERVAL '1 day'),
+              ('90000000-0000-0000-0000-000000000003','10000000-0000-0000-0000-000000000002','Morning Meditation 21 Days','Meditate for at least 10 minutes every morning for 21 consecutive days. Science shows 21 days is what it takes to form a lasting habit.','2026-05-01','2026-05-21','MINDFULNESS',NOW()-INTERVAL '1 day'),
+              ('90000000-0000-0000-0000-000000000004','10000000-0000-0000-0000-000000000004','Hydration Heroes: 3L Daily','Drink a minimum of 3 litres of water every day for 30 days. Log your intake, notice the changes, and share your wins with the group!','2026-04-20','2026-05-20','HYDRATION',NOW()-INTERVAL '11 days'),
+              ('90000000-0000-0000-0000-000000000005','10000000-0000-0000-0000-000000000005','Sleep 8 Hours for 30 Days','Commit to 8 full hours in bed every night for 30 days. No exceptions. Track your mood, cognition and performance. Sleep first!','2026-05-01','2026-05-30','SLEEP',NOW()-INTERVAL '1 day'),
+              ('90000000-0000-0000-0000-000000000006','10000000-0000-0000-0000-000000000006','Cycling Century Challenge','Ride a combined total of 100km over the next 30 days. Log every ride. Whether it''s commuting or epic trails — every km counts!','2026-04-25','2026-05-25','EXERCISE',NOW()-INTERVAL '6 days'),
+              ('90000000-0000-0000-0000-000000000007','10000000-0000-0000-0000-000000000011','Read 30 Minutes Daily','Read a physical book or e-reader for 30 uninterrupted minutes every day this month. No audiobooks — your brain needs the full workout!','2026-05-01','2026-05-31','LEARNING',NOW()-INTERVAL '1 day'),
+              ('90000000-0000-0000-0000-000000000008','10000000-0000-0000-0000-000000000013','Plant-Based Week','Eat 100% whole food plant-based for 7 days. No meat, no dairy, no processed food. Discover how incredible you can feel from food alone!','2026-05-05','2026-05-11','NUTRITION',NOW()),
+              ('90000000-0000-0000-0000-000000000009','10000000-0000-0000-0000-000000000009','Gratitude Journaling Sprint','Write 5 specific things you are grateful for every evening for 21 days. Specificity is key — not ''family'' but ''my sister called me today''.','2026-05-01','2026-05-21','MINDFULNESS',NOW()-INTERVAL '1 day');
+
+              INSERT INTO public.challenge_participants (id, challenge_id, user_id, joined_at, is_completed) VALUES
+              ('a0000000-0000-0000-0000-000000000001','90000000-0000-0000-0000-000000000001','10000000-0000-0000-0000-000000000001',NOW()-INTERVAL '15 days',false),
+              ('a0000000-0000-0000-0000-000000000002','90000000-0000-0000-0000-000000000001','10000000-0000-0000-0000-000000000004',NOW()-INTERVAL '14 days',false),
+              ('a0000000-0000-0000-0000-000000000003','90000000-0000-0000-0000-000000000002','10000000-0000-0000-0000-000000000003',NOW()-INTERVAL '12 hours',false),
+              ('a0000000-0000-0000-0000-000000000004','90000000-0000-0000-0000-000000000002','10000000-0000-0000-0000-000000000006',NOW()-INTERVAL '10 hours',false),
+              ('a0000000-0000-0000-0000-000000000005','90000000-0000-0000-0000-000000000003','10000000-0000-0000-0000-000000000004',NOW()-INTERVAL '20 hours',false),
+              ('a0000000-0000-0000-0000-000000000006','90000000-0000-0000-0000-000000000003','10000000-0000-0000-0000-000000000005',NOW()-INTERVAL '18 hours',false),
+              ('a0000000-0000-0000-0000-000000000007','90000000-0000-0000-0000-000000000004','10000000-0000-0000-0000-000000000001',NOW()-INTERVAL '10 days',false),
+              ('a0000000-0000-0000-0000-000000000008','90000000-0000-0000-0000-000000000004','10000000-0000-0000-0000-000000000007',NOW()-INTERVAL '9 days',false),
+              ('a0000000-0000-0000-0000-000000000009','90000000-0000-0000-0000-000000000005','10000000-0000-0000-0000-000000000002',NOW()-INTERVAL '22 hours',false),
+              ('a0000000-0000-0000-0000-000000000010','90000000-0000-0000-0000-000000000005','10000000-0000-0000-0000-000000000009',NOW()-INTERVAL '20 hours',false),
+              ('a0000000-0000-0000-0000-000000000011','90000000-0000-0000-0000-000000000006','10000000-0000-0000-0000-000000000001',NOW()-INTERVAL '5 days',false),
+              ('a0000000-0000-0000-0000-000000000012','90000000-0000-0000-0000-000000000006','10000000-0000-0000-0000-000000000008',NOW()-INTERVAL '4 days',false),
+              ('a0000000-0000-0000-0000-000000000013','90000000-0000-0000-0000-000000000007','10000000-0000-0000-0000-000000000010',NOW()-INTERVAL '16 hours',false),
+              ('a0000000-0000-0000-0000-000000000014','90000000-0000-0000-0000-000000000007','10000000-0000-0000-0000-000000000015',NOW()-INTERVAL '14 hours',false),
+              ('a0000000-0000-0000-0000-000000000015','90000000-0000-0000-0000-000000000008','10000000-0000-0000-0000-000000000003',NOW()-INTERVAL '6 hours',false),
+              ('a0000000-0000-0000-0000-000000000016','90000000-0000-0000-0000-000000000008','10000000-0000-0000-0000-000000000007',NOW()-INTERVAL '5 hours',false),
+              ('a0000000-0000-0000-0000-000000000017','90000000-0000-0000-0000-000000000009','10000000-0000-0000-0000-000000000002',NOW()-INTERVAL '23 hours',false),
+              ('a0000000-0000-0000-0000-000000000018','90000000-0000-0000-0000-000000000009','10000000-0000-0000-0000-000000000014',NOW()-INTERVAL '21 hours',false);
