@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Trophy, Users, Plus, CheckCircle, Trash2, ShieldX } from 'lucide-react';
+import { Trophy, Users, Plus, CheckCircle, Trash2, ShieldX, ChevronDown, ChevronUp } from 'lucide-react';
 import { api } from '../api/axios';
 import { useAuth } from '../auth/KeycloakContext';
 
@@ -10,6 +10,11 @@ export function Challenges() {
   const [loading, setLoading] = useState(true);
   const [showCreate, setShowCreate] = useState(false);
   const [newChallenge, setNewChallenge] = useState({ title: '', description: '', startDate: '', endDate: '', category: 'EXERCISE' });
+
+  // Track which challenge's participant list is expanded + fetched data
+  const [expandedParticipants, setExpandedParticipants] = useState<Record<string, boolean>>({});
+  const [participantData, setParticipantData] = useState<Record<string, any[]>>({});
+  const [participantLoading, setParticipantLoading] = useState<Record<string, boolean>>({});
 
   const fetchData = async () => {
     try {
@@ -78,6 +83,29 @@ export function Challenges() {
     }
   };
 
+  const toggleParticipants = async (challengeId: string) => {
+    const isCurrentlyExpanded = expandedParticipants[challengeId];
+
+    // Toggle the expanded state
+    setExpandedParticipants(prev => ({ ...prev, [challengeId]: !isCurrentlyExpanded }));
+
+    // Fetch if opening and not yet loaded
+    if (!isCurrentlyExpanded && !participantData[challengeId]) {
+      setParticipantLoading(prev => ({ ...prev, [challengeId]: true }));
+      try {
+        const res = await api.get(`/challenges/${challengeId}/participants`);
+        setParticipantData(prev => ({
+          ...prev,
+          [challengeId]: res.data.content || res.data || []
+        }));
+      } catch (error) {
+        console.error('Error fetching participants', error);
+      } finally {
+        setParticipantLoading(prev => ({ ...prev, [challengeId]: false }));
+      }
+    }
+  };
+
   return (
     <div className="animate-[fadeIn_0.4s_ease-out]">
       <header className="mb-8 flex justify-between items-end">
@@ -140,6 +168,9 @@ export function Challenges() {
             challenges.map(challenge => {
               const isParticipating = challenge.isJoined;
               const isCreator = challenge.creatorId === user?.sub;
+              const isExpanded = !!expandedParticipants[challenge.id];
+              const participants = participantData[challenge.id] || [];
+              const isLoadingParticipants = !!participantLoading[challenge.id];
 
               return (
                 <div key={challenge.id} className="glass-card relative overflow-hidden group">
@@ -152,12 +183,64 @@ export function Challenges() {
                         <h3 className="text-xl font-bold text-slate-100 mb-1">{challenge.title}</h3>
                         <p className="text-slate-300 text-sm mb-2">{challenge.description}</p>
                         <div className="flex items-center gap-4 text-xs font-medium text-slate-400">
-                          <span className="flex items-center gap-1"><Users size={14} /> {challenge.participantsCount || 0} participants</span>
+                          {/* Participants count with toggle button */}
+                          <button
+                            onClick={() => toggleParticipants(challenge.id)}
+                            className="flex items-center gap-1 hover:text-yellow-400 transition-colors cursor-pointer"
+                            title="View participants"
+                          >
+                            <Users size={14} />
+                            {challenge.participantsCount || 0} participants
+                            {isExpanded ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
+                          </button>
                           <span>Ends: {new Date(challenge.endDate).toLocaleDateString()}</span>
+                          {/* Creator link */}
+                          {challenge.creatorUsername && (
+                            <span>
+                              by{' '}
+                              <a
+                                href={`/profile/${challenge.creatorId}`}
+                                className="text-yellow-400 hover:underline"
+                              >
+                                {challenge.creatorUsername}
+                              </a>
+                            </span>
+                          )}
                         </div>
                       </div>
                     </div>
                   </div>
+
+                  {/* Participants panel */}
+                  {isExpanded && (
+                    <div className="mt-2 mb-4 p-4 rounded-xl bg-black/20 border border-white/5">
+                      <h4 className="text-sm font-semibold text-slate-300 mb-3 flex items-center gap-2">
+                        <Users size={14} className="text-yellow-500" /> Participants
+                      </h4>
+                      {isLoadingParticipants ? (
+                        <p className="text-slate-400 text-sm">Loading...</p>
+                      ) : participants.length === 0 ? (
+                        <p className="text-slate-400 text-sm">No participants yet.</p>
+                      ) : (
+                        <div className="flex flex-col gap-2">
+                          {participants.map((p: any) => (
+                            <a
+                              key={p.id}
+                              href={`/profile/${p.id}`}
+                              className="flex items-center gap-3 p-2 rounded-lg hover:bg-white/5 transition-colors group/p"
+                            >
+                              <div className="w-8 h-8 rounded-full bg-yellow-500/20 border border-yellow-500/40 flex items-center justify-center text-yellow-400 font-bold text-sm uppercase group-hover/p:ring-2 group-hover/p:ring-yellow-500/50 transition-all">
+                                {(p.username || 'U').charAt(0)}
+                              </div>
+                              <span className="text-sm text-slate-200 group-hover/p:text-yellow-400 transition-colors font-medium">
+                                {p.username}
+                              </span>
+                            </a>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )}
 
                   <div className="flex gap-2 mt-4 pt-4 border-t border-white/5">
                     {!isParticipating ? (
@@ -181,11 +264,12 @@ export function Challenges() {
                     )}
                   </div>
                 </div>
-              )
+              );
             })
           )}
         </div>
 
+        {/* Leaderboard sidebar */}
         <div className="lg:col-span-1">
           <div className="glass-card sticky top-8">
             <h3 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
@@ -193,20 +277,24 @@ export function Challenges() {
               Global Leaderboard
             </h3>
             
-            <div className="flex flex-col gap-4">
+            <div className="flex flex-col gap-3">
               {leaderboard.length === 0 ? (
                 <p className="text-slate-400 text-sm text-center py-4">No users on leaderboard yet.</p>
               ) : (
                 leaderboard.map((userStats, index) => (
-                  <div key={userStats.userId} className={`flex items-center gap-3 p-3 rounded-xl ${index === 0 ? 'bg-yellow-500/10 border border-yellow-500/30' : 'bg-white/5'}`}>
-                    <div className={`w-8 h-8 flex items-center justify-center font-bold rounded-full ${index === 0 ? 'bg-yellow-500 text-dark' : index === 1 ? 'bg-slate-300 text-dark' : index === 2 ? 'bg-orange-400 text-dark' : 'bg-white/10 text-slate-300'}`}>
+                  <a
+                    key={userStats.userId}
+                    href={`/profile/${userStats.userId}`}
+                    className={`flex items-center gap-3 p-3 rounded-xl transition-colors hover:bg-white/10 ${index === 0 ? 'bg-yellow-500/10 border border-yellow-500/30' : 'bg-white/5'}`}
+                  >
+                    <div className={`w-8 h-8 flex items-center justify-center font-bold rounded-full shrink-0 ${index === 0 ? 'bg-yellow-500 text-dark' : index === 1 ? 'bg-slate-300 text-dark' : index === 2 ? 'bg-orange-400 text-dark' : 'bg-white/10 text-slate-300'}`}>
                       {index + 1}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="font-semibold text-slate-100 truncate">{userStats.username}</p>
+                      <p className={`font-semibold truncate transition-colors ${index === 0 ? 'text-yellow-400' : 'text-slate-100 hover:text-accent-cyan'}`}>{userStats.username}</p>
                       <p className="text-xs text-slate-400">🔥 {userStats.currentStreak || 0} streak · {userStats.totalHabitsCompleted || 0} habits</p>
                     </div>
-                  </div>
+                  </a>
                 ))
               )}
             </div>

@@ -80,11 +80,11 @@ export function Post({ post, onRefresh }: { post: any, onRefresh: () => void }) 
     <div className="glass-card mb-6">
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-4">
-          <div className="w-12 h-12 rounded-full bg-accent-green/20 border border-accent-green flex items-center justify-center font-bold text-accent-green uppercase">
+          <a href={`/profile/${post.authorId}`} className="w-12 h-12 rounded-full bg-accent-green/20 border border-accent-green flex items-center justify-center font-bold text-accent-green uppercase hover:ring-2 hover:ring-accent-green/60 transition-all shrink-0">
             {(post.authorUsername || post.authorName || 'U').charAt(0)}
-          </div>
+          </a>
           <div>
-            <h4 className="font-semibold text-lg">{post.authorUsername || post.authorName || 'Unknown User'}</h4>
+            <a href={`/profile/${post.authorId}`} className="font-semibold text-lg hover:text-accent-cyan transition-colors block">{post.authorUsername || post.authorName || 'Unknown User'}</a>
             <span className="text-sm text-slate-400">{new Date(post.createdAt).toLocaleString()}</span>
           </div>
         </div>
@@ -152,11 +152,11 @@ export function Post({ post, onRefresh }: { post: any, onRefresh: () => void }) 
           <div className="flex flex-col gap-4">
             {comments.map(c => (
               <div key={c.id} className="flex gap-3 text-sm">
-                 <div className="w-8 h-8 shrink-0 rounded-full bg-accent-cyan/20 border border-accent-cyan flex items-center justify-center font-bold text-accent-cyan uppercase text-xs">
+                 <a href={`/profile/${c.authorId}`} className="w-8 h-8 shrink-0 rounded-full bg-accent-cyan/20 border border-accent-cyan flex items-center justify-center font-bold text-accent-cyan uppercase text-xs hover:ring-2 hover:ring-accent-cyan/60 transition-all">
                     {(c.authorUsername || c.authorName || 'U').charAt(0)}
-                 </div>
+                 </a>
                  <div className="flex-1 bg-white/5 rounded-2xl rounded-tl-sm p-3 relative group">
-                    <span className="font-semibold block mb-1 text-accent-cyan">{c.authorUsername || c.authorName}</span>
+                    <a href={`/profile/${c.authorId}`} className="font-semibold block mb-1 text-accent-cyan hover:underline">{c.authorUsername || c.authorName}</a>
                     <p className="text-slate-300">{c.content}</p>
                     {(user?.sub === c.authorId || user?.sub === c.userId) && (
                       <button 

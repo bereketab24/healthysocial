@@ -39,13 +39,13 @@ export function Profile() {
         api.get(`/users/${realUserId}/followers`),
         api.get(`/users/${realUserId}/following`)
       ]);
-      setFollowers(followersRes.data || []);
-      setFollowing(followingRes.data || []);
+      setFollowers(followersRes.data.content || followersRes.data || []);
+      setFollowing(followingRes.data.content || followingRes.data || []);
 
       // Check if current user follows this profile (if not own profile)
       if (!isOwnProfile && realUserId) {
         const isFollowRes = await api.get(`/users/${realUserId}/is-following`);
-        setIsFollowing(isFollowRes.data?.isFollowing || false);
+        setIsFollowing(isFollowRes.data?.following || false);
       }
 
       // Fetch User's Posts

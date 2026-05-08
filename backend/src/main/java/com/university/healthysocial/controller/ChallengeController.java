@@ -79,4 +79,14 @@ public class ChallengeController {
     public ResponseEntity<ChallengeResponse> markComplete(@PathVariable UUID challengeId) {
         return ResponseEntity.ok(challengeService.markCompleted(challengeId));
     }
+
+    @GetMapping("/{challengeId}/participants")
+    @Operation(summary = "List all participants of a challenge")
+    public ResponseEntity<PageResponse<?>> getParticipants(
+            @PathVariable UUID challengeId,
+            @RequestParam(defaultValue = "0")  int page,
+            @RequestParam(defaultValue = "50") int size) {
+        return ResponseEntity.ok(
+                challengeService.getChallengeParticipants(challengeId, PageRequest.of(page, size)));
+    }
 }

@@ -7,12 +7,14 @@ import com.university.healthysocial.domain.enums.HabitCategory;
 import com.university.healthysocial.dto.request.Requests.CreateChallengeRequest;
 import com.university.healthysocial.dto.response.Responses.ChallengeResponse;
 import com.university.healthysocial.dto.response.Responses.PageResponse;
-import com.university.healthysocial.exception.DuplicateResourceException;
+import com.university.healthysocial.dto.response.Responses.UserProfileResponse;
 import com.university.healthysocial.exception.ForbiddenOperationException;
 import com.university.healthysocial.exception.ResourceNotFoundException;
 import com.university.healthysocial.mapper.ChallengeMapper;
+import com.university.healthysocial.mapper.UserMapper;
 import com.university.healthysocial.repository.ChallengeParticipantRepository;
 import com.university.healthysocial.repository.ChallengeRepository;
+import com.university.healthysocial.repository.FollowRepository;
 import com.university.healthysocial.security.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -34,6 +36,8 @@ public class ChallengeService {
     private final UserService userService;
     private final ChallengeMapper challengeMapper;
     private final SecurityUtils securityUtils;
+    private final FollowRepository followRepository;
+    private final UserMapper userMapper;
 
     public PageResponse<ChallengeResponse> getAllChallenges(HabitCategory category, boolean activeOnly, Pageable pageable) {
         Page<Challenge> challenges = challengeRepository.findChallenges(category, activeOnly, LocalDate.now(), pageable);
@@ -132,6 +136,31 @@ public class ChallengeService {
         participantRepository.save(participant);
         
         return mapToResponse(challenge);
+    }
+
+    public PageResponse<UserProfileResponse> getChallengeParticipants(UUID challengeId, Pageable pageable) {
+        Challenge challenge = challengeRepository.findById(challengeId)
+                .orElseThrow(() -> new ResourceNotFoundException("Challenge", challengeId));
+
+        Page<ChallengeParticipant> participantPage = participantRepository.findByChallenge(challenge, pageable);
+
+        List<UserProfileResponse> profiles = participantPage.getContent().stream()
+                .map(cp -> {
+                    User u = cp.getUser();
+                    long followersCount = followRepository.countByFollowing(u);
+                    long followingCount = followRepository.countByFollower(u);
+                    return userMapper.toProfileResponse(u, followersCount, followingCount);
+                })
+                .toList();
+
+        return new PageResponse<>(
+                profiles,
+                participantPage.getNumber(),
+                participantPage.getSize(),
+                participantPage.getTotalElements(),
+                participantPage.getTotalPages(),
+                participantPage.isLast()
+        );
     }
 
     private ChallengeResponse mapToResponse(Challenge challenge) {
