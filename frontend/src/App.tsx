@@ -5,6 +5,7 @@ import { Habits } from './pages/Habits';
 import { Goals } from './pages/Goals';
 import { Challenges } from './pages/Challenges';
 import { Profile } from './pages/Profile';
+import { Analytics } from './pages/Analytics';
 import { useAuth } from './auth/KeycloakContext';
 
 function App() {
@@ -30,6 +31,7 @@ function App() {
               <Route path="/habits" element={<Habits />} />
               <Route path="/goals" element={<Goals />} />
               <Route path="/challenges" element={<Challenges />} />
+              <Route path="/analytics" element={<Analytics />} />
               <Route path="/profile/:id" element={<Profile />} />
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>

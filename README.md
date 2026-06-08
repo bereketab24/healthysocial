@@ -96,6 +96,63 @@ We use **Liquibase** to manage the database schema. Every change is a "changeset
 - **Tailwind CSS**: Utility-first styling for rapid UI development and a consistent design system.
 - **Axios Interceptors**: Automatically attaches the Keycloak token to every request and handles token refreshing seamlessly.
 
+## ☁️ Cloud Architecture (GCP)
+
+HealthySocial is deployed on **Google Cloud Platform** using three managed services:
+
+| Service | Role |
+| --- | --- |
+| **Compute Engine** | VM (`healthysocial-vm`, `europe-central2-a`) hosting Postgres, Keycloak, and the Spring Boot backend in Docker. |
+| **Cloud Shell / Storage** | Cloud Shell drives the periodic export of Postgres tables; CSVs are staged in a Cloud Storage bucket. |
+| **BigQuery** | Analytical warehouse. The backend reads aggregated metrics via SQL and exposes them through `/api/analytics/*`. |
+
+```
+┌──────────────────┐  export   ┌──────────┐  bq load  ┌───────────────┐
+│ Postgres (VM)    │ ────────▶ │   GCS    │ ────────▶ │   BigQuery    │
+│ operational data │           │ staging  │           │   analytics   │
+└──────────────────┘           └──────────┘           └───────┬───────┘
+                                                              │ JDBC-style
+                                                              │ queries
+                                                      ┌───────▼───────┐
+                                                      │ Spring Boot   │
+                                                      │ /api/analytics│
+                                                      └───────┬───────┘
+                                                              │
+                                                      ┌───────▼───────┐
+                                                      │ React UI      │
+                                                      │ /analytics    │
+                                                      └───────────────┘
+```
+
+This is the classic **OLTP/OLAP split**: Postgres handles transactional writes for posts, likes, habit logs, etc., while BigQuery powers the read-heavy analytical dashboard.
+
+### Analytics endpoints
+
+| Endpoint | Returns |
+| --- | --- |
+| `GET /api/analytics/top-users` | Top users by combined posts + comments + likes received |
+| `GET /api/analytics/engagement?days=N` | Daily posts/comments/likes for the last N days |
+| `GET /api/analytics/challenge-stats` | Participants and completion rate per challenge |
+| `GET /api/analytics/habit-streaks` | Top habit/user pairs by completed log count |
+| `GET /api/analytics/post-engagement` | Top posts by likes + comments |
+
+Visible in the UI at `/analytics`.
+
+### Configuration
+
+The backend connects to BigQuery via environment variables. On GCP, credentials are resolved automatically through Application Default Credentials (the VM has a service account attached) — no JSON key file needed.
+
+```
+BQ_ENABLED=true
+BQ_PROJECT_ID=<gcp-project-id>
+BQ_DATASET=healthysocial_analytics
+BQ_LOCATION=europe-central2
+```
+
+When `BQ_ENABLED=false` (default) or the project is unset, the endpoints return `[]` instead of failing — the rest of the app keeps working locally without GCP credentials.
+
+Full setup runbook: [`docs/bigquery-setup.md`](docs/bigquery-setup.md).
+
 ## 📂 Project Structure
 
 ```text
@@ -107,6 +164,7 @@ healthysocial/
 ├── frontend/           # React Application
 │   ├── src/            # React components, pages, hooks
 │   └── package.json
+├── docs/               # Operational runbooks (BigQuery setup, etc.)
 └── compose.yaml        # Docker orchestration
 ```
 

@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom';
-import { Home, CheckCircle, Trophy, User, LogIn, LogOut } from 'lucide-react';
+import { Home, CheckCircle, Trophy, User, LogIn, LogOut, BarChart3 } from 'lucide-react';
 import { useAuth } from '../auth/KeycloakContext';
 
 export function Sidebar() {
@@ -30,6 +30,10 @@ export function Sidebar() {
             <NavLink to="/challenges" className={({ isActive }) => `flex items-center gap-4 p-3 rounded-xl font-medium transition-all duration-200 ${isActive ? 'bg-accent-green/10 text-accent-green' : 'text-slate-400 hover:bg-white/5 hover:text-slate-100'}`}>
               <Trophy size={20} />
               <span>Challenges</span>
+            </NavLink>
+            <NavLink to="/analytics" className={({ isActive }) => `flex items-center gap-4 p-3 rounded-xl font-medium transition-all duration-200 ${isActive ? 'bg-accent-green/10 text-accent-green' : 'text-slate-400 hover:bg-white/5 hover:text-slate-100'}`}>
+              <BarChart3 size={20} />
+              <span>Analytics</span>
             </NavLink>
             <NavLink to="/profile/me" className={({ isActive }) => `flex items-center gap-4 p-3 rounded-xl font-medium transition-all duration-200 ${isActive ? 'bg-accent-green/10 text-accent-green' : 'text-slate-400 hover:bg-white/5 hover:text-slate-100'}`}>
               <User size={20} />
