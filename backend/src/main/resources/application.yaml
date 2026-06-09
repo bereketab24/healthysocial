@@ -49,6 +49,15 @@ app:
     default-page-size: 20
     max-page-size: 100
 
+# ── BigQuery analytics ───────────────────────────────────────────────────────
+# Credentials come from GOOGLE_APPLICATION_CREDENTIALS env var (service account JSON).
+# When BQ_PROJECT_ID is unset the AnalyticsService returns empty results gracefully.
+bigquery:
+  enabled: ${BQ_ENABLED:false}
+  project-id: ${BQ_PROJECT_ID:}
+  dataset: ${BQ_DATASET:healthysocial_analytics}
+  location: ${BQ_LOCATION:europe-central2}
+
 # ── Actuator ─────────────────────────────────────────────────────────────────
 management:
   endpoints:

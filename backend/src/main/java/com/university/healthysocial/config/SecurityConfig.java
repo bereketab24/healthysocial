@@ -36,6 +36,7 @@ public class SecurityConfig {
             "/api/users/{id}/profile",
             "/api/leaderboard",
             "/api/challenges",
+            "/api/analytics/**",
             // Infrastructure & docs
             "/actuator/health",
             "/actuator/info",

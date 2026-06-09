@@ -41,6 +41,9 @@ dependencies {
     runtimeOnly("org.postgresql:postgresql")
     implementation("org.liquibase:liquibase-core")
 
+    // ── Google Cloud BigQuery ─────────────────────────────────────────
+    implementation("com.google.cloud:google-cloud-bigquery:2.42.0")
+
     // ── Lombok ────────────────────────────────────────────────────────
     compileOnly("org.projectlombok:lombok")
     annotationProcessor("org.projectlombok:lombok")
